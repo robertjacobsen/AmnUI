@@ -1,0 +1,11 @@
+## Interface: 40000
+## Title: Amnith's UI 
+## Notes: One addon making my UI. 
+## Author: Amnith
+## Version: 1.0
+## SavedVariables: AmnUI
+uf.lua
+chat.lua
+frames.lua
+tooltip.lua
+utility.lua
