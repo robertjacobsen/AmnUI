@@ -1,5 +1,3 @@
-local AmnUI 
-
 local PositionFrames = function() 
 	PlayerFrame:ClearAllPoints()
 	PlayerFrame:SetPoint("CENTER", nil, "CENTER", -150, -180)
