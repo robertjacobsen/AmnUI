@@ -1,3 +1,4 @@
+-- Fix the fonts. 
 ChatFontNormal:SetFont(select(1, ChatFontNormal:GetFont()), 16)
 SystemFont_Shadow_Small:SetFont(select(1, SystemFont_Shadow_Small:GetFont()), 11)
 CHAT_FONT_HEIGHTS = {
