@@ -1,24 +1,27 @@
+local db
+
+local AMNUF_DEFAULT_FONT_NAME, AMNUF_DEFAULT_FONT_SIZE = GameFontNormalSmall:GetFont()
 local PositionFrames = function() 
 	PlayerFrame:ClearAllPoints()
-	PlayerFrame:SetPoint("CENTER", nil, "CENTER", -150, -180)
-	PlayerFrame:SetScale(1.3)
-
 	TargetFrame:ClearAllPoints()
-	TargetFrame:SetPoint("LEFT", PlayerFrame, "RIGHT", 50, 0)
-	TargetFrame:SetScale(1.3)
-
 	PartyMemberFrame1:ClearAllPoints()
-	PartyMemberFrame1:SetPoint("LEFT", TargetFrame, "RIGHT", 50, 0)
 
+	if db.UnitFrames.Reposition then 
+		PlayerFrame:SetPoint("CENTER", UIParent, "CENTER", -150, -180)
+		TargetFrame:SetPoint("LEFT", PlayerFrame, "RIGHT", 50, 0)
+		PartyMemberFrame1:SetPoint("LEFT", TargetFrame, "RIGHT", 50, 0)
+	else
+		PlayerFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", -19, -4)
+		TargetFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 250, -4)
+		PartyMemberFrame1:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 10, -160)
+	end
+
+	TargetFrame:SetScale(1.3)
+	PlayerFrame:SetScale(1.3)
 	for i = 1,4 do
 		getglobal("PartyMemberFrame" .. i):SetScale(1.3)
 	end
 end
-
-
-
-
-local AMNUF_DEFAULT_FONT_NAME, AMNUF_DEFAULT_FONT_SIZE = GameFontNormalSmall:GetFont()
 
 local unitframes = CreateFrame"Frame"
 unitframes:RegisterEvent"UNIT_HEALTH"
@@ -29,8 +32,9 @@ unitframes:RegisterEvent"UNIT_FOCUS"
 unitframes:RegisterEvent"PLAYER_ENTERING_WORLD"
 unitframes:RegisterEvent"PLAYER_TARGET_CHANGED"
 unitframes:RegisterEvent"PLAYER_LOGIN"
-unitframes:SetScript("OnEvent", function (self, event, unit) 
-	self[event](unit)
+unitframes:RegisterEvent"ADDON_LOADED"
+unitframes:SetScript("OnEvent", function (self, event, ...) 
+	self[event](self, event, ...)
 end)
 
 local bars = {
@@ -40,7 +44,7 @@ local bars = {
 	["TargetFrameManaBar"] = "TargetFrameManaText",
 }
 
-local Update = function (unit) 
+local Update = function (self, event, unit) 
 	if unit ~= "player" and unit ~= "target" then return end
 	local health = ""
 	if not UnitIsDead(unit) then
@@ -63,41 +67,40 @@ local Update = function (unit)
 	end
 end
 
-unitframes.PLAYER_LOGIN = function() 
-	if not AmnUI then 
-		AmnUI = {
-			UnitFrames = {}
-		}
+unitframes.ADDON_LOADED = function(self, event, addon) 
+	if addon == "AmnUI" then
+		db = AmnUI
+		-- If the database isn't initialized, initialize it with default values
+		if not db then 
+			db = {
+				UnitFrames = {
+					FontSize = AMNUF_DEFAULT_FONT_SIZE,
+					Reposition = true,
+				}
+			}
+			AmnUI = db
+		end
 	end
-	
-	-- If the database isn't initialized, initialize it with default values
-	if not AmnUI.UnitFrames.FontSize then 
-		AmnUI.UnitFrames.FontSize = AMNUF_DEFAULT_FONT_SIZE
-	end
+end
 
-	if not AmnUI.UnitFrames.Reposition then
-		AmnUI.UnitFrames.Reposition = true
-	end
-
-	if AmnUI.UnitFrames.Reposition then
-		PositionFrames()
-	end
+unitframes.PLAYER_LOGIN = function(...)
+	PositionFrames()
 
 	for parent, child in pairs(bars) do
 		local frame = CreateFrame("Frame", nil, getglobal(parent:sub(1,11)))
 		frame:SetFrameStrata"HIGH"
 		frame:CreateFontString(child)
-		getglobal(child):SetFont(AMNUF_DEFAULT_FONT_NAME, AmnUI.UnitFrames.FontSize)
+		getglobal(child):SetFont(AMNUF_DEFAULT_FONT_NAME, db.UnitFrames.FontSize)
 		getglobal(child):SetShadowOffset(1, -1)
 		getglobal(child):SetPoint("CENTER", getglobal(parent), "CENTER", -1, 0)
 	end
 end
 
-unitframes.PLAYER_ENTERING_WORLD = function ()
-	Update"player"
+unitframes.PLAYER_ENTERING_WORLD = function (self, event)
+	Update(self, event, "player")
 end
-unitframes.PLAYER_TARGET_CHANGED = function ()
-	Update"target"
+unitframes.PLAYER_TARGET_CHANGED = function (self, event)
+	Update(self, event, "target")
 end
 unitframes.UNIT_HEALTH = Update
 unitframes.UNIT_MANA = Update
@@ -118,13 +121,13 @@ end
 
 local Help = function() 
 	Print("Usage is /amnuf <command> <argument>.")
-	Print(string.format("/amnuf size <number> sets the font size. Current value: [%d]", AmnUI.UnitFrames.FontSize))
-	Print("/amnuf reposition toggles whether or not the unitframes will be repositioned.")
+	Print(string.format("/amnuf size <number> - Sts the font size. Current value: [%d]", db.UnitFrames.FontSize))
+	Print(string.format("/amnuf pos - Toggles whether or not the unitframes will be repositioned. [%d]", tostring(db.UnitFrames.Reposition)))
 end
 
 local UpdateFontSizes = function() 
 	for parent, child in pairs(bars) do
-		getglobal(child):SetFont(AMNUF_DEFAULT_FONT_NAME, AmnUI.UnitFrames.FontSize)
+		getglobal(child):SetFont(AMNUF_DEFAULT_FONT_NAME, db.UnitFrames.FontSize)
 	end
 end
 
@@ -142,13 +145,16 @@ SlashCmdList['AMNUF'] = function (arguments)
 		if not args[1] then return Help() end
 		local value = tonumber(args[1]) or 0
 		if value >= 8 and value <= 20 then
-			AmnUI.UnitFrames.FontSize = argument
+			db.UnitFrames.FontSize = args[1] 
 			UpdateFontSizes()
 			return
 		end
-	elseif args[0] == 'reposition' then
-		AmnUI.UnitFrames.Reposition = not AmnUI.UnitFrames.Reposition
-		Print(string.format("UnitFrame reposition is now %s", tostring(AmnUI.UnitFrames.Reposition)))
+	elseif args[0] == 'pos' then
+		db.UnitFrames.Reposition = not db.UnitFrames.Reposition
+		local en
+
+		Print(string.format("UnitFrame reposition is now %s", tostring(db.UnitFrames.Reposition)))
+		PositionFrames()
 		return
 	end
 	Help()
