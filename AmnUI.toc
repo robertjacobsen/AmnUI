@@ -3,7 +3,8 @@
 ## Notes: One addon making my UI. 
 ## Author: Amnith
 ## Version: 1.0
-## SavedVariables: AmnUI
+## SavedVariables: AmnUIDB
+core.lua
 uf.lua
 chat.lua
 frames.lua
