@@ -151,7 +151,6 @@ ChatPanel.FixChat = function()
 end
 
 ChatPanel.MakeFrame = function(width, height, color) 
-	ChatFrame1:AddMessage("hi")
         local frame = CreateFrame"Frame"
 
         frame:SetBackdrop({
@@ -172,21 +171,28 @@ ChatPanel.Enable = function()
 end
 
 ChatPanel.Draw = function() 
-	if ChatPanel.Frame then ChatPanel.Frame = nil end
+	if ChatPanel.Frame then 
+		ChatPanel.Frame.u:Hide()
+		ChatPanel.Frame.r:Hide()
+		ChatPanel.Frame.l:Hide()
+		ChatPanel.Frame.b:Hide()
+		ChatPanel.Frame:Hide()
+		ChatPanel.Frame = nil 
+	end
 	local cf = ChatPanel.MakeFrame(db.ChatPanel.Width, db.ChatPanel.Height, ChatPanel.colors.tBlack)
 	cf:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 45, 50)
 
-        local cful = ChatPanel.MakeFrame(2, db.ChatPanel.Height + 2, ChatPanel.colors.tBlue) 
-	cful:SetPoint("RIGHT", cf, "LEFT")
+   	cf.u = ChatPanel.MakeFrame(2, db.ChatPanel.Height + 2, ChatPanel.colors.tBlue) 
+	cf.u:SetPoint("RIGHT", cf, "LEFT")
 
-        local cfur = ChatPanel.MakeFrame(2, db.ChatPanel.Height + 2, ChatPanel.colors.tBlue) 
-	cfur:SetPoint("LEFT", cf, "RIGHT")
+    cf.r = ChatPanel.MakeFrame(2, db.ChatPanel.Height + 2, ChatPanel.colors.tBlue) 
+	cf.r:SetPoint("LEFT", cf, "RIGHT")
 
-        local cfut = ChatPanel.MakeFrame(db.ChatPanel.Width + 4, 2, ChatPanel.colors.tBlue) 
-	cfut:SetPoint("BOTTOM", cf, "TOP")
+    cf.l = ChatPanel.MakeFrame(db.ChatPanel.Width + 4, 2, ChatPanel.colors.tBlue) 
+	cf.l:SetPoint("BOTTOM", cf, "TOP")
 
-        local cfub = ChatPanel.MakeFrame(db.ChatPanel.Width + 4, 2, ChatPanel.colors.tBlue) 
-	cfub:SetPoint("TOP", cf, "BOTTOM")
+    cf.b = ChatPanel.MakeFrame(db.ChatPanel.Width + 4, 2, ChatPanel.colors.tBlue) 
+	cf.b:SetPoint("TOP", cf, "BOTTOM")
 	
 	ChatPanel.Frame = cf
 
@@ -232,9 +238,9 @@ end
 -- A basic slash handler
 UnitFrames.Help = function() 
 	Print("Usage is /amnui uf <command> <argument>.")
-	Print(string.format("/amnuf size <number> - Sets the font size. Current size: [%d]", db.UnitFrames.FontSize))
-	Print(string.format("/amnuf pos - Toggles whether or not the unit frames will be repositioned. [%s]", tostring(db.UnitFrames.Reposition)))
-	Print(string.format("/amnuf scale <decimal> - Sets the scale of the unit frames. Current scale: [%.1f]", db.UnitFrames.Scale))
+	Print(string.format("/amnui uf size <number> - Sets the font size. Current size: [%d]", db.UnitFrames.FontSize))
+	Print(string.format("/amnui uf pos - Toggles whether or not the unit frames will be repositioned. [%s]", tostring(db.UnitFrames.Reposition)))
+	Print(string.format("/amnui uf scale <decimal> - Sets the scale of the unit frames. Current scale: [%.1f]", db.UnitFrames.Scale))
 end
 
 ChatPanel.Help = function()
@@ -243,8 +249,14 @@ ChatPanel.Help = function()
 	Print(string.format("/amnui frame height <number> - Sets the frame's height. Current height: [%d]", db.ChatPanel.Height))
 end
 
+AmnUI.Help = function()
+	Print("Usage is /amnui <module> <command> <argument>.")
+	Print("/amnui frame - Frame configurations.")
+	Print("/amnui uf - Unit Frame configurations.")
+end
+
 SlashCmdList['AMNUI'] = function (arguments) 
-	if not arguments then return UnitFrames.Help() end
+	if not arguments then return AmnUI.Help() end
 
 	local args = {}
 	local i = 0;
@@ -275,7 +287,7 @@ SlashCmdList['AMNUI'] = function (arguments)
 				return
 			end
 		end
-		UnitFrames.Help()
+		return UnitFrames.Help()
 	elseif args[0] == 'frame' then
 		if not args[1] or not args[2] then return ChatPanel.Help() end
 		local value = tonumber(args[2])
@@ -287,14 +299,15 @@ SlashCmdList['AMNUI'] = function (arguments)
 			end
 		elseif args[1] == 'height' then
 			if value <= 600 and value >= 50 then
-				db.ChatPanel.height = value
+				db.ChatPanel.Height = value
 				ChatPanel.Draw()
 				return
 			end
 		end
 	end
+	AmnUI.Help()
 end
-SLASH_AMNUF1 = '/amnuf'
+SLASH_AMNUI1 = '/amnui'
 
 SlashCmdList['AMNUI_RELOAD'] = ReloadUI
 SLASH_AMNUI_RELOAD1 = '/rl'
