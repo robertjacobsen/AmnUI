@@ -244,14 +244,14 @@ UnitFrames.Help = function()
 end
 
 ChatPanel.Help = function()
-	Print("Usage is /amnui frame <command> <argument>.")
-	Print(string.format("/amnui frame width <number> - Sets the frame's width. Current width: [%d]", db.ChatPanel.Width))
-	Print(string.format("/amnui frame height <number> - Sets the frame's height. Current height: [%d]", db.ChatPanel.Height))
+	Print("Usage is /amnui chat <command> <argument>.")
+	Print(string.format("/amnui chat width <number> - Sets the frame's width. Current width: [%d]", db.ChatPanel.Width))
+	Print(string.format("/amnui chat height <number> - Sets the frame's height. Current height: [%d]", db.ChatPanel.Height))
 end
 
 AmnUI.Help = function()
 	Print("Usage is /amnui <module> <command> <argument>.")
-	Print("/amnui frame - Frame configurations.")
+	Print("/amnui chat - Chat Frame configurations.")
 	Print("/amnui uf - Unit Frame configurations.")
 end
 
@@ -288,7 +288,7 @@ SlashCmdList['AMNUI'] = function (arguments)
 			end
 		end
 		return UnitFrames.Help()
-	elseif args[0] == 'frame' then
+	elseif args[0] == 'chat' then
 		if not args[1] or not args[2] then return ChatPanel.Help() end
 		local value = tonumber(args[2])
 		if args[1] == 'width' then
