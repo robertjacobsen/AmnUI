@@ -1,3 +1,0 @@
-SlashCmdList['AMNUI_RELOAD'] = ReloadUI
-SLASH_AMNUI_RELOAD1 = '/rl'
-SLASH_AMNUI_RELOAD2 = '/reload'
