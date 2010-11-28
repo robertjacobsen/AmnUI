@@ -10,10 +10,7 @@ end
 
 local UnitFrames = CreateFrame"Frame"
 UnitFrames:RegisterEvent"UNIT_HEALTH"
-UnitFrames:RegisterEvent"UNIT_MANA"
-UnitFrames:RegisterEvent"UNIT_RAGE"
-UnitFrames:RegisterEvent"UNIT_ENERGY"
-UnitFrames:RegisterEvent"UNIT_FOCUS"
+UnitFrames:RegisterEvent"UNIT_POWER"
 UnitFrames:RegisterEvent"PLAYER_ENTERING_WORLD"
 UnitFrames:RegisterEvent"PLAYER_TARGET_CHANGED"
 UnitFrames:SetScript("OnEvent", function (self, event, ...) 
@@ -104,10 +101,7 @@ UnitFrames.PLAYER_TARGET_CHANGED = function (self, event)
 	self.Update(self, event, "target")
 end
 UnitFrames.UNIT_HEALTH = UnitFrames.Update
-UnitFrames.UNIT_MANA = UnitFrames.Update
-UnitFrames.UNIT_FOCUS = UnitFrames.Update
-UnitFrames.UNIT_ENERGY = UnitFrames.Update
-UnitFrames.UNIT_RAGE = UnitFrames.Update
+UnitFrames.UNIT_POWER = UnitFrames.Update
 
 UnitFrames.UpdateFontSizes = function() 
 	for parent, child in pairs(UnitFrames.bars) do
