@@ -134,26 +134,16 @@ ChatPanel.FixChat = function()
         for k in pairs(CHAT_FRAME_TEXTURES) do
                 CHAT_FRAME_TEXTURES[k] = nil
         end
-
-        ChatFrame1:ClearAllPoints()
-	ChatFrame1:SetUserPlaced(true)
-        ChatFrame1:SetPoint("BOTTOM", ChatPanel.Frame, 0, 3)
-        ChatFrame1:SetPoint("TOP", ChatPanel.Frame, 0, -3)
-        ChatFrame1:SetPoint("LEFT", ChatPanel.Frame, 3, 0)
-        ChatFrame1:SetPoint("RIGHT", ChatPanel.Frame, -3, 0)
-        FCF_SetLocked(ChatFrame1, 1)
 end
 
-ChatPanel.MakeFrame = function(width, height, color) 
-        local frame = CreateFrame"Frame"
+ChatPanel.MakeFrame = function(color) 
+        local frame = CreateFrame("Frame", nil, UIParent)
 
         frame:SetBackdrop({
                 bgFile = "Interface\\ChatFrame\\ChatFrameBackground", tile = true, tileSize = 16,
                 edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", edgeSize = 16,
                 insets = {left = 0, right = 0, top = 0, bottom = 0},
         })
-        frame:SetHeight(height)
-        frame:SetWidth(width)
         frame:SetBackdropColor(color.r, color.g, color.b, color.a)
         frame:SetBackdropBorderColor(0, 0, 0, 0)
         frame:SetFrameStrata"BACKGROUND"
@@ -173,20 +163,40 @@ ChatPanel.Draw = function()
 		ChatPanel.Frame:Hide()
 		ChatPanel.Frame = nil 
 	end
-	local cf = ChatPanel.MakeFrame(db.ChatPanel.Width, db.ChatPanel.Height, ChatPanel.colors.tBlack)
-	cf:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 45, 50)
 
-   	cf.u = ChatPanel.MakeFrame(2, db.ChatPanel.Height + 2, ChatPanel.colors.tBlue) 
-	cf.u:SetPoint("RIGHT", cf, "LEFT")
+	local width = ChatFrame1:GetWidth()
+	local height = ChatFrame1:GetHeight()
 
-    cf.r = ChatPanel.MakeFrame(2, db.ChatPanel.Height + 2, ChatPanel.colors.tBlue) 
+	local cf = ChatPanel.MakeFrame(ChatPanel.colors.tBlack)
+	cf:SetPoint("BOTTOMLEFT", nil, "BOTTOMLEFT", 45, 50)
+	cf:SetPoint("TOP", ChatFrame1, "TOP")
+	cf:SetPoint("LEFT", ChatFrame1, "LEFT")
+	cf:SetPoint("RIGHT", ChatFrame1, "RIGHT")
+	cf:SetPoint("BOTTOM", ChatFrame1, "BOTTOM")
+
+   	cf.l = ChatPanel.MakeFrame(ChatPanel.colors.tBlue) 
+	cf.l:SetPoint("RIGHT", cf, "LEFT")
+	cf.l:SetPoint("TOP", cf)
+	cf.l:SetPoint("BOTTOM", cf)
+	cf.l:SetWidth(2)
+
+	cf.r = ChatPanel.MakeFrame(ChatPanel.colors.tBlue) 
 	cf.r:SetPoint("LEFT", cf, "RIGHT")
+	cf.r:SetPoint("TOP", cf)
+	cf.r:SetPoint("BOTTOM", cf)
+	cf.r:SetWidth(2)
 
-    cf.l = ChatPanel.MakeFrame(db.ChatPanel.Width + 4, 2, ChatPanel.colors.tBlue) 
-	cf.l:SetPoint("BOTTOM", cf, "TOP")
+	cf.u = ChatPanel.MakeFrame(ChatPanel.colors.tBlue) 
+	cf.u:SetPoint("BOTTOM", cf, "TOP")
+	cf.u:SetPoint("LEFT", cf, -2, 0)
+	cf.u:SetPoint("RIGHT", cf, 2, 0)
+	cf.u:SetHeight(2)
 
-    cf.b = ChatPanel.MakeFrame(db.ChatPanel.Width + 4, 2, ChatPanel.colors.tBlue) 
+	cf.b = ChatPanel.MakeFrame(ChatPanel.colors.tBlue) 
 	cf.b:SetPoint("TOP", cf, "BOTTOM")
+	cf.b:SetPoint("LEFT", cf, -2, 0)
+	cf.b:SetPoint("RIGHT", cf, 2, 0)
+	cf.b:SetHeight(2)
 	
 	ChatPanel.Frame = cf
 
