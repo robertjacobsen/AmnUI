@@ -168,7 +168,6 @@ ChatPanel.Draw = function()
 	local height = ChatFrame1:GetHeight()
 
 	local cf = ChatPanel.MakeFrame(ChatPanel.colors.tBlack)
-	cf:SetPoint("BOTTOMLEFT", nil, "BOTTOMLEFT", 45, 50)
 	cf:SetPoint("TOP", ChatFrame1, "TOP")
 	cf:SetPoint("LEFT", ChatFrame1, "LEFT")
 	cf:SetPoint("RIGHT", ChatFrame1, "RIGHT")
@@ -219,10 +218,6 @@ AmnUI.ADDON_LOADED = function(self, event, addon)
 		db = AmnUIDB
 		if not db then
 			db = {
-				ChatPanel = {
-					Width = 450,
-					Height = 280,
-				},
 				UnitFrames = {	
 					FontSize = AMNUF_DEFAULT_FONT_SIZE,
 					Reposition = true,
@@ -247,15 +242,8 @@ UnitFrames.Help = function()
 	Print(string.format("/amnui uf scale <decimal> - Sets the scale of the unit frames. Current scale: [%.1f]", db.UnitFrames.Scale))
 end
 
-ChatPanel.Help = function()
-	Print("Usage is /amnui chat <command> <argument>.")
-	Print(string.format("/amnui chat width <number> - Sets the frame's width. Current width: [%d]", db.ChatPanel.Width))
-	Print(string.format("/amnui chat height <number> - Sets the frame's height. Current height: [%d]", db.ChatPanel.Height))
-end
-
 AmnUI.Help = function()
 	Print("Usage is /amnui <module> <command> <argument>.")
-	Print("/amnui chat - Chat Frame configurations.")
 	Print("/amnui uf - Unit Frame configurations.")
 end
 
@@ -292,22 +280,6 @@ SlashCmdList['AMNUI'] = function (arguments)
 			end
 		end
 		return UnitFrames.Help()
-	elseif args[0] == 'chat' then
-		if not args[1] or not args[2] then return ChatPanel.Help() end
-		local value = tonumber(args[2])
-		if args[1] == 'width' then
-			if value <= 1000 and value >= 100 then
-				db.ChatPanel.Width = value
-				ChatPanel.Draw()
-				return
-			end
-		elseif args[1] == 'height' then
-			if value <= 600 and value >= 50 then
-				db.ChatPanel.Height = value
-				ChatPanel.Draw()
-				return
-			end
-		end
 	end
 	AmnUI.Help()
 end
