@@ -113,15 +113,9 @@ AmnUI.UnitFrames = UnitFrames
 
 --[[ ChatPanel specific code ]]
 local ChatPanel = CreateFrame"Frame"
-ChatPanel:RegisterEvent"UI_SCALE_CHANGED"
-ChatPanel:RegisterEvent"DISPLAY_SIZE_CHANGED"
-ChatPanel:SetScript("OnEvent", function(self, event, ...) 
-	self[event](self, event, ...)
-end)
-
 ChatPanel.colors = { tBlack = {r = 0, g = 0, b = 0, a = 0.7},
-	    	     sBlack = {r = 0, g = 0, b = 0, a = 1},
-		     tBlue  = {r = 0.243, g = 0.298, b = 0.345, a = 0.7}, }
+	    	     	 sBlack = {r = 0, g = 0, b = 0, a = 1},
+		    		 tBlue  = {r = 0.243, g = 0.298, b = 0.345, a = 0.7}, }
 
 ChatPanel.FixChat = function()
 	if not ChatPanel.Frame then return end
@@ -168,10 +162,10 @@ ChatPanel.Draw = function()
 	local height = ChatFrame1:GetHeight()
 
 	local cf = ChatPanel.MakeFrame(ChatPanel.colors.tBlack)
-	cf:SetPoint("TOP", ChatFrame1, "TOP")
-	cf:SetPoint("LEFT", ChatFrame1, "LEFT")
-	cf:SetPoint("RIGHT", ChatFrame1, "RIGHT")
-	cf:SetPoint("BOTTOM", ChatFrame1, "BOTTOM")
+	cf:SetPoint("TOP", ChatFrame1, "TOP", 0, 1)
+	cf:SetPoint("LEFT", ChatFrame1, "LEFT", -2, 0)
+	cf:SetPoint("RIGHT", ChatFrame1, "RIGHT", 2, 0)
+	cf:SetPoint("BOTTOM", ChatFrame1, "BOTTOM", 0, -2)
 
    	cf.l = ChatPanel.MakeFrame(ChatPanel.colors.tBlue) 
 	cf.l:SetPoint("RIGHT", cf, "LEFT")
@@ -202,10 +196,121 @@ ChatPanel.Draw = function()
 	ChatPanel.FixChat()
 end
 
-ChatPanel.UI_SCALE_CHANGED = ChatPanel.FixChat
-ChatPanel.DISPLAY_SIZE_CHANGED = ChatPanel.FixChat
-
 AmnUI.ChatPanel = ChatPanel
+
+local ActionBars = CreateFrame"Frame"
+
+ActionBars.Page = {
+    ["DRUID"] = "[bonusbar:1,nostealth] 7; [bonusbar:1,stealth] %s; [bonusbar:2] 8; [bonusbar:3] 9; [bonusbar:4] 10;",
+    ["WARRIOR"] = "[bonusbar:1] 7; [bonusbar:2] 8; [bonusbar:3] 9;",
+    ["PRIEST"] = "[bonusbar:1] 7;",
+    ["ROGUE"] = "[bonusbar:1] 7; [form:3] 7;",
+    ["WARLOCK"] = "[form:2] 7;",
+    ["DEFAULT"] = "[bar:2] 2; [bar:3] 3; [bar:4] 4; [bar:5] 5; [bar:6] 6; [bonusbar:5] 11;",
+}
+  
+ActionBars.GetBar = function()
+    local condition = ActionBars.Page["DEFAULT"]
+    local class = select(2, UnitClass"player") 
+    local page = ActionBars.Page[class]
+    if page then
+      if class == "DRUID" then
+        -- Handles prowling, prowling has no real stance, so this is a hack which utilizes the Tree of Life bar for non-resto druids.
+        if IsSpellKnown(33891) then -- Tree of Life form
+          page = page:format(7)
+        else
+          page = page:format(8)
+        end
+      end
+      condition = condition.." "..page
+    end
+    condition = condition.." 1"
+    return condition
+end
+
+ActionBars.RemoveTextures = function()
+	local FramesToHide = {
+    	MainMenuBar, 
+    	MainMenuBarArtFrame, 
+    	BonusActionBarFrame, 
+    	VehicleMenuBar,
+    	PossessBarFrame,
+  	}  
+
+	for _, f in pairs(FramesToHide) do
+    	if f:GetObjectType() == "Frame" then
+    		f:UnregisterAllEvents()
+    	end
+    	f:HookScript("OnShow", function(s) s:Hide(); end)
+    	f:Hide()
+  	end
+end
+
+ActionBars.MoveBars = function() 
+	local actionbars = {}
+
+	for i = 1,3 do
+		local bar = CreateFrame("Frame", "AmnUIActionBar"..i, UIParent, "SecureHandlerStateTemplate")
+		bar:SetWidth(getglobal("ActionButton1"):GetWidth() * 13.5)
+		bar:SetHeight(getglobal("ActionButton1"):GetHeight() * 1.5)
+		if i == 1 then 
+			bar:SetPoint("BOTTOM", UIParent) 
+		else
+			bar:SetPoint("BOTTOM", actionbars[i-1], "TOP")
+		end
+		actionbars[i] = bar
+	end
+
+	for i = 1, 12 do
+		actionbars[1]:SetFrameRef("ActionButton"..i, getglobal("ActionButton"..i))
+	end
+
+	local buttons
+	actionbars[1]:Execute([[
+		buttons = table.new()
+		for i = 1, 12 do
+			table.insert(buttons, self:GetFrameRef("ActionButton"..i))
+		end
+	]])
+	actionbars[1]:SetAttribute("_onstate-page", [[
+		for _, button in ipairs(buttons) do 
+			button:SetAttribute("actionpage", tonumber(newstate))
+		end
+	]])
+	RegisterStateDriver(actionbars[1], "page", ActionBars.GetBar())
+
+	local bars = {
+		[3] = "MultiBarBottomRight",
+		[2] = "MultiBarBottomLeft",
+		[1] = "Action"
+	}
+
+	for b, f in pairs(bars) do 
+		if f ~= "Action" then
+			getglobal(f):SetParent(actionbars[b])
+		end
+
+		for i = 1, 12 do
+			local button = getglobal(f.."Button"..i)
+			button:ClearAllPoints()
+			button:SetParent(bar)
+			if i == 1 then
+				button:SetPoint("BOTTOMLEFT", actionbars[b])
+			else
+				button:SetPoint("LEFT", getglobal(f.."Button"..i-1), "RIGHT", 3, 0)
+			end
+		end
+	end
+end
+
+ActionBars.Enable = function() 
+	ActionBars.RemoveTextures()
+	ActionBars.MoveBars()
+end
+
+AmnUI.ActionBars = ActionBars
+
+
 
 AmnUI:RegisterEvent"ADDON_LOADED"
 AmnUI:RegisterEvent"PLAYER_LOGIN"
@@ -232,6 +337,7 @@ end
 AmnUI.PLAYER_LOGIN = function(self, event, ...)
 	AmnUI.UnitFrames.Enable()
 	AmnUI.ChatPanel.Enable()
+	AmnUI.ActionBars.Enable()
 end
 
 -- A basic slash handler
