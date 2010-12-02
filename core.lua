@@ -38,7 +38,7 @@ UnitFrames.Scale = function(self)
 	TargetFrame:SetScale(db.UnitFrames.Scale)
 	PlayerFrame:SetScale(db.UnitFrames.Scale)
 	for i = 1,4 do
-		getglobal("PartyMemberFrame" .. i):SetScale(db.UnitFrames.Scale)
+		_G["PartyMemberFrame" .. i]:SetScale(db.UnitFrames.Scale)
 	end
 end
 
@@ -64,11 +64,11 @@ UnitFrames.Update = function(self, event, unit)
 
 	local mana = string.format("%d / %d (%d%%)", UnitMana(unit), UnitManaMax(unit), mpper)
 	if unit == "player" then
-		getglobal("PlayerFrameHealthText"):SetText(health)
-		getglobal("PlayerFrameManaText"):SetText(mana)
+		PlayerFrameHealthText:SetText(health)
+		PlayerFrameManaText:SetText(mana)
 	else
-		getglobal("TargetFrameHealthText"):SetText(health)
-		getglobal("TargetFrameManaText"):SetText(mana)
+		TargetFrameHealthText:SetText(health)
+		TargetFrameManaText:SetText(mana)
 	end
 end
 
@@ -77,12 +77,12 @@ UnitFrames.Enable = function()
 	UnitFrames.Scale()
 
 	for parent, child in pairs(UnitFrames.bars) do
-		local frame = CreateFrame("Frame", nil, getglobal(parent:sub(1,11)))
+		local frame = CreateFrame("Frame", nil, _G[parent:sub(1,11)])
 		frame:SetFrameStrata"HIGH"
 		frame:CreateFontString(child)
-		getglobal(child):SetFont(AMNUF_DEFAULT_FONT_NAME, db.UnitFrames.FontSize)
-		getglobal(child):SetShadowOffset(1, -1)
-		getglobal(child):SetPoint("CENTER", getglobal(parent), "CENTER", -1, 0)
+		_G[child]:SetFont(AMNUF_DEFAULT_FONT_NAME, db.UnitFrames.FontSize)
+		_G[child]:SetShadowOffset(1, -1)
+		_G[child]:SetPoint("CENTER", _G[parent], "CENTER", -1, 0)
 	end
 
 	-- Hide old strings.
@@ -105,7 +105,7 @@ UnitFrames.UNIT_POWER = UnitFrames.Update
 
 UnitFrames.UpdateFontSizes = function() 
 	for parent, child in pairs(UnitFrames.bars) do
-		getglobal(child):SetFont(AMNUF_DEFAULT_FONT_NAME, db.UnitFrames.FontSize)
+		_G[child]:SetFont(AMNUF_DEFAULT_FONT_NAME, db.UnitFrames.FontSize)
 	end
 end
 
@@ -121,7 +121,7 @@ ChatPanel.FixChat = function()
 	if not ChatPanel.Frame then return end
         for i = 1,7 do
                 for k,v in pairs(CHAT_FRAME_TEXTURES) do
-                        getglobal("ChatFrame"..i..v):Hide()
+                        _G["ChatFrame"..i..v]:Hide()
                 end
         end
         
@@ -248,56 +248,68 @@ end
 
 ActionBars.MoveBars = function() 
 	local actionbars = {}
+	local names = {
+		[1] = "MainMenuBar",
+		[2] = "MultiBarBottomLeft",
+		[3] = "MultiBarBottomRight"
+	}
 
 	for i = 1,3 do
-		local bar = CreateFrame("Frame", "AmnUIActionBar"..i, UIParent, "SecureHandlerStateTemplate")
-		bar:SetWidth(getglobal("ActionButton1"):GetWidth() * 13.5)
-		bar:SetHeight(getglobal("ActionButton1"):GetHeight() * 1.5)
+		local bar = CreateFrame("Frame", "AmnUI_"..names[i], UIParent, "SecureHandlerStateTemplate")
+		actionbars[i] = bar
+		bar:SetWidth(35*13.5)
+		bar:SetHeight(35)
 		if i == 1 then 
 			bar:SetPoint("BOTTOM", UIParent) 
 		else
 			bar:SetPoint("BOTTOM", actionbars[i-1], "TOP")
 		end
-		actionbars[i] = bar
-	end
+		_G[names[i]]:SetParent(bar)
+		
+		if i == 1 then
+			for j = 1, NUM_ACTIONBAR_BUTTONS do
+				bar:SetFrameRef("ActionButton"..j, _G["ActionButton"..j])
+			end
 
-	for i = 1, 12 do
-		actionbars[1]:SetFrameRef("ActionButton"..i, getglobal("ActionButton"..i))
-	end
+			local button, buttons
+			bar:Execute([[
+				buttons = table.new()
+				for j = 1, 12 do
+					table.insert(buttons, self:GetFrameRef("ActionButton"..j))
+				end
+			]])
 
-	local buttons
-	actionbars[1]:Execute([[
-		buttons = table.new()
-		for i = 1, 12 do
-			table.insert(buttons, self:GetFrameRef("ActionButton"..i))
-		end
-	]])
-	actionbars[1]:SetAttribute("_onstate-page", [[
-		for _, button in ipairs(buttons) do 
-			button:SetAttribute("actionpage", tonumber(newstate))
-		end
-	]])
-	RegisterStateDriver(actionbars[1], "page", ActionBars.GetBar())
+			bar:SetAttribute("_onstate-page", [[
+				for _, button in ipairs(buttons) do 
+					button:SetAttribute("actionpage", tonumber(newstate))
+				end
+			]])
 
-	local bars = {
-		[3] = "MultiBarBottomRight",
-		[2] = "MultiBarBottomLeft",
-		[1] = "Action"
-	}
-
-	for b, f in pairs(bars) do 
-		if f ~= "Action" then
-			getglobal(f):SetParent(actionbars[b])
+			RegisterStateDriver(bar, "page", ActionBars.GetBar())
 		end
 
-		for i = 1, 12 do
-			local button = getglobal(f.."Button"..i)
+		local prefix = names[i]
+		if names[i] == "MainMenuBar" then
+			prefix = "Action"
+		end
+
+		for j = 1, 12 do
+			local button = _G[prefix.."Button"..j]
+			button:SetSize(35,35)
 			button:ClearAllPoints()
-			button:SetParent(bar)
+			
+			-- Fix icon
+			_G[prefix.."Button"..i.."Icon"]:SetTexCoord(.07, .93, .07, .93)
+
+			-- TODO: Fix border
+
 			if i == 1 then
-				button:SetPoint("BOTTOMLEFT", actionbars[b])
+				button:SetParent(bar)
+			end
+			if j == 1 then
+				button:SetPoint("BOTTOMLEFT", bar)
 			else
-				button:SetPoint("LEFT", getglobal(f.."Button"..i-1), "RIGHT", 3, 0)
+				button:SetPoint("LEFT", _G[prefix.."Button"..j-1], "RIGHT", 3, 0)
 			end
 		end
 	end
