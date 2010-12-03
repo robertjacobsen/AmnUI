@@ -257,8 +257,9 @@ ActionBars.MoveBars = function()
 	for i = 1,3 do
 		local bar = CreateFrame("Frame", "AmnUI_"..names[i], UIParent, "SecureHandlerStateTemplate")
 		actionbars[i] = bar
-		bar:SetWidth(35*13.5)
+		bar:SetWidth(35*12)
 		bar:SetHeight(35)
+		bar:SetScale(1.2)
 		if i == 1 then 
 			bar:SetPoint("BOTTOM", UIParent) 
 		else
@@ -294,22 +295,45 @@ ActionBars.MoveBars = function()
 		end
 
 		for j = 1, 12 do
-			local button = _G[prefix.."Button"..j]
+			local name = prefix.."Button"..j
+			local button = _G[name]
 			button:SetSize(35,35)
 			button:ClearAllPoints()
 			
 			-- Fix icon
-			_G[prefix.."Button"..i.."Icon"]:SetTexCoord(.07, .93, .07, .93)
-
+			local icon = _G[name.."Icon"]
+			icon:SetTexCoord(.07, .93, .07, .93)
+			icon:SetAllPoints(button)
+			
 			-- TODO: Fix border
+			local border = _G[name.."Border"]		
+			border:Hide()
+			border.Show = function() end
+			
+			local nt = _G[name.."NormalTexture"]
+			nt:ClearAllPoints()
+			nt:Hide()
+			nt.Show = function() end
 
+			local hk = _G[name.."HotKey"]
+			hk:Hide()
+			hk.MyShow = hk.Show
+			hk.Show = function() end
+
+			local nm = _G[name.."Name"]
+			nm:Hide()
+
+			button:SetScript("OnEnter", function() hk:MyShow() end)
+			button:SetScript("OnLeave", function() hk:Hide() end)
+			
 			if i == 1 then
 				button:SetParent(bar)
 			end
+
 			if j == 1 then
 				button:SetPoint("BOTTOMLEFT", bar)
 			else
-				button:SetPoint("LEFT", _G[prefix.."Button"..j-1], "RIGHT", 3, 0)
+				button:SetPoint("LEFT", _G[prefix.."Button"..j-1], "RIGHT", 0, 0)
 			end
 		end
 	end
