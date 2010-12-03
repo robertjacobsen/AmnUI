@@ -313,6 +313,7 @@ ActionBars.MoveBars = function()
 			local nt = _G[name.."NormalTexture"]
 			nt:ClearAllPoints()
 			nt:Hide()
+			nt:SetAlpha(0)
 			nt.Show = function() end
 
 			local hk = _G[name.."HotKey"]
