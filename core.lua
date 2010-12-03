@@ -314,6 +314,7 @@ ActionBars.MoveBars = function()
 			nt:ClearAllPoints()
 			nt:Hide()
 			nt:SetAlpha(0)
+			nt.SetAlpha = function() end
 			nt.Show = function() end
 
 			local hk = _G[name.."HotKey"]
