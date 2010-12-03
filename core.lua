@@ -324,9 +324,11 @@ ActionBars.MoveBars = function()
 
 			local nm = _G[name.."Name"]
 			nm:Hide()
-
-			button:SetScript("OnEnter", function() hk:MyShow() end)
-			button:SetScript("OnLeave", function() hk:Hide() end)
+			
+			local oe = button:GetScript"OnEnter"
+			local ol = button:GetScript"OnLeave"
+			button:SetScript("OnEnter", function(...) hk:MyShow() oe(...) end)
+			button:SetScript("OnLeave", function(...) hk:Hide() oe(...) end)
 			
 			if i == 1 then
 				button:SetParent(bar)
