@@ -339,9 +339,33 @@ ActionBars.MoveBars = function()
 	end
 end
 
+ActionBars.ImAShaman = function()
+	local bar = _G['MultiCastActionBarFrame']
+	if bar then
+		local holder = CreateFrame("Frame","AmnUI_TotemBar",UIParent, "SecureHandlerStateTemplate")
+		holder:SetWidth(bar:GetWidth())
+		holder:SetHeight(bar:GetHeight())
+	  
+	  	bar:SetParent(holder)
+		bar:SetAllPoints(holder)
+		
+		hooksecurefunc(bar, "SetPoint", function() bar:SetAllPoints(holder) end)
+		holder:SetPoint("BOTTOMRIGHT", UIParent)
+		
+		holder:SetScale(1.2)
+
+		bar:SetMovable(true)
+		bar:SetUserPlaced(true)
+		bar:EnableMouse(false)
+	end
+end
+
 ActionBars.Enable = function() 
 	ActionBars.RemoveTextures()
 	ActionBars.MoveBars()
+	if select(2, UnitClass"player") == "SHAMAN" then
+		ActionBars.ImAShaman()
+	end
 end
 
 AmnUI.ActionBars = ActionBars
