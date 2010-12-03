@@ -342,17 +342,17 @@ end
 ActionBars.ImAShaman = function()
 	local bar = _G['MultiCastActionBarFrame']
 	if bar then
-		local holder = CreateFrame("Frame","AmnUI_TotemBar",UIParent, "SecureHandlerStateTemplate")
-		holder:SetWidth(bar:GetWidth())
-		holder:SetHeight(bar:GetHeight())
+		local container = CreateFrame("Frame","AmnUI_TotemBar",UIParent, "SecureHandlerStateTemplate")
+		container:SetWidth(bar:GetWidth())
+		container:SetHeight(bar:GetHeight())
 	  
-	  	bar:SetParent(holder)
-		bar:SetAllPoints(holder)
+	  	bar:SetParent(container)
+		bar:SetAllPoints(container)
 		
-		hooksecurefunc(bar, "SetPoint", function() bar:SetAllPoints(holder) end)
-		holder:SetPoint("BOTTOMRIGHT", UIParent)
+		hooksecurefunc(bar, "SetPoint", function() bar:SetAllPoints(container) end)
+		container:SetPoint("BOTTOMRIGHT", UIParent)
 		
-		holder:SetScale(1.2)
+		container:SetScale(1.2)
 
 		bar:SetMovable(true)
 		bar:SetUserPlaced(true)
