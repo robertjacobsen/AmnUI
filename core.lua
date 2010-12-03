@@ -346,6 +346,16 @@ end
 
 AmnUI.ActionBars = ActionBars
 
+local CastBar = CreateFrame"Frame"
+
+CastBar.Enable = function() 
+	local cb = CastingBarFrame	
+	cb:ClearAllPoints()
+	cb:SetPoint("BOTTOM", UIParent, 0, 150)
+	cb.SetPoint = function() end
+end
+
+AmnUI.CastBar = CastBar
 
 
 AmnUI:RegisterEvent"ADDON_LOADED"
@@ -374,6 +384,7 @@ AmnUI.PLAYER_LOGIN = function(self, event, ...)
 	AmnUI.UnitFrames.Enable()
 	AmnUI.ChatPanel.Enable()
 	AmnUI.ActionBars.Enable()
+	AmnUI.CastBar.Enable()
 end
 
 -- A basic slash handler
