@@ -31,144 +31,170 @@ ActionBars.GetBar = function()
 end
 
 ActionBars.RemoveTextures = function()
-	local FramesToHide = {
-    	MainMenuBar, 
-    	MainMenuBarArtFrame, 
-    	BonusActionBarFrame, 
-    	VehicleMenuBar,
-    	PossessBarFrame,
-  	}  
+    local FramesToHide = {
+        MainMenuBar, 
+        MainMenuBarArtFrame, 
+        BonusActionBarFrame, 
+        VehicleMenuBar,
+        PossessBarFrame,
+    }  
 
-	for _, f in pairs(FramesToHide) do
-    	if f:GetObjectType() == "Frame" then
-    		f:UnregisterAllEvents()
-    	end
-    	f:HookScript("OnShow", function(s) s:Hide(); end)
-    	f:Hide()
-  	end
+    for _, f in pairs(FramesToHide) do
+        if f:GetObjectType() == "Frame" then
+            f:UnregisterAllEvents()
+        end
+        f:HookScript("OnShow", function(s) s:Hide(); end)
+        f:Hide()
+    end
 end
 
 ActionBars.MoveBars = function() 
-	local actionbars = {}
-	local names = {
-		[1] = "MainMenuBar",
-		[2] = "MultiBarBottomLeft",
-		[3] = "MultiBarBottomRight"
-	}
+    local actionbars = {}
+    local names = {
+        [1] = "MainMenuBar",
+        [2] = "MultiBarBottomLeft",
+        [3] = "MultiBarBottomRight"
+    }
 
-	for i = 1,3 do
-		local bar = CreateFrame("Frame", "AmnUI_"..names[i], UIParent, "SecureHandlerStateTemplate")
-		actionbars[i] = bar
-		bar:SetWidth(35*12)
-		bar:SetHeight(35)
-		bar:SetScale(1.2)
-		if i == 1 then 
-			bar:SetPoint("BOTTOM", UIParent) 
-		else
-			bar:SetPoint("BOTTOM", actionbars[i-1], "TOP")
-		end
-		_G[names[i]]:SetParent(bar)
-		
-		if i == 1 then
-			for j = 1, NUM_ACTIONBAR_BUTTONS do
-				bar:SetFrameRef("ActionButton"..j, _G["ActionButton"..j])
-			end
+    for i = 1,3 do
+        local bar = CreateFrame("Frame", "AmnUI_"..names[i], UIParent, "SecureHandlerStateTemplate")
+        actionbars[i] = bar
+        bar:SetWidth(35*12)
+        bar:SetHeight(35)
+        bar:SetScale(1.2)
+        if i == 1 then 
+            bar:SetPoint("BOTTOM", UIParent) 
+        else
+            bar:SetPoint("BOTTOM", actionbars[i-1], "TOP")
+        end
+        _G[names[i]]:SetParent(bar)
+        
+        if i == 1 then
+            for j = 1, NUM_ACTIONBAR_BUTTONS do
+                bar:SetFrameRef("ActionButton"..j, _G["ActionButton"..j])
+            end
 
-			local button, buttons
-			bar:Execute([[
-				buttons = table.new()
-				for j = 1, 12 do
-					table.insert(buttons, self:GetFrameRef("ActionButton"..j))
-				end
-			]])
+            local button, buttons
+            bar:Execute([[
+                buttons = table.new()
+                for j = 1, 12 do
+                    table.insert(buttons, self:GetFrameRef("ActionButton"..j))
+                end
+            ]])
 
-			bar:SetAttribute("_onstate-page", [[
-				for _, button in ipairs(buttons) do 
-					button:SetAttribute("actionpage", tonumber(newstate))
-				end
-			]])
+            bar:SetAttribute("_onstate-page", [[
+                for _, button in ipairs(buttons) do 
+                    button:SetAttribute("actionpage", tonumber(newstate))
+                end
+            ]])
 
-			RegisterStateDriver(bar, "page", ActionBars.GetBar())
-		end
+            RegisterStateDriver(bar, "page", ActionBars.GetBar())
+        end
 
-		local prefix = names[i]
-		if names[i] == "MainMenuBar" then
-			prefix = "Action"
-		end
+        local prefix = names[i]
+        if names[i] == "MainMenuBar" then
+            prefix = "Action"
+        end
 
-		for j = 1, 12 do
-			local name = prefix.."Button"..j
-			local button = _G[name]
-			button:SetSize(35,35)
-			button:ClearAllPoints()
-			
-			-- Fix icon
-			local icon = _G[name.."Icon"]
-			icon:SetTexCoord(.07, .93, .07, .93)
-			icon:SetAllPoints(button)
-			
-			local border = _G[name.."Border"]		
-			border:Hide()
-			border.Show = function() end
-			
-			local nt = _G[name.."NormalTexture"]
-			nt:SetPoint("BOTTOM", 0, -100000000000) -- GET THE HELL OFF MY SCREEN
-			nt:Hide()
-			nt:SetAlpha(0)
-			nt.SetAlpha = function() end
-			nt.Show = function() end
+        for j = 1, 12 do
+            local name = prefix.."Button"..j
+            local button = _G[name]
+            button:SetSize(35,35)
+            button:ClearAllPoints()
+            
+            -- Fix icon
+            local icon = _G[name.."Icon"]
+            icon:SetTexCoord(.07, .93, .07, .93)
+            icon:SetAllPoints(button)
+            
+            local border = _G[name.."Border"]       
+            border:Hide()
+            border.Show = function() end
+            
+            local nt = _G[name.."NormalTexture"]
+            nt:SetPoint("BOTTOM", 0, -100000000000) -- GET THE HELL OFF MY SCREEN
+            nt:Hide()
+            nt:SetAlpha(0)
+            nt.SetAlpha = function() end
+            nt.Show = function() end
 
-			local hk = _G[name.."HotKey"]
-			hk:Hide()
-			hk.MyShow = hk.Show
-			hk.Show = function() end
+            local hk = _G[name.."HotKey"]
+            hk:Hide()
+            hk.MyShow = hk.Show
+            hk.Show = function() end
 
-			local nm = _G[name.."Name"]
-			nm:Hide()
-			
-			local oe = button:GetScript"OnEnter"
-			local ol = button:GetScript"OnLeave"
-			button:SetScript("OnEnter", function(...) hk:MyShow() oe(...) end)
-			button:SetScript("OnLeave", function(...) hk:Hide() oe(...) end)
-			
-			if i == 1 then
-				button:SetParent(bar)
-			end
+            local nm = _G[name.."Name"]
+            nm:Hide()
+            
+            local oe = button:GetScript"OnEnter"
+            local ol = button:GetScript"OnLeave"
+            button:SetScript("OnEnter", function(...) hk:MyShow() oe(...) end)
+            button:SetScript("OnLeave", function(...) hk:Hide() oe(...) end)
+            
+            if i == 1 then
+                button:SetParent(bar)
+            end
 
-			if j == 1 then
-				button:SetPoint("BOTTOMLEFT", bar)
-			else
-				button:SetPoint("LEFT", _G[prefix.."Button"..j-1], "RIGHT", 0, 0)
-			end
-		end
-	end
+            if j == 1 then
+                button:SetPoint("BOTTOMLEFT", bar)
+            else
+                button:SetPoint("LEFT", _G[prefix.."Button"..j-1], "RIGHT", 0, 0)
+            end
+        end
+    end
+
+    -- StanceBar
+    local StanceBar = CreateFrame("Frame", "AmnUI_StanceBar", UIParent, "SecureHandlerStateTemplate")
+    ShapeshiftBarFrame:SetParent(StanceBar)
+    
+    for i = 1, NUM_SHAPESHIFT_SLOTS do
+        local button = _G["ShapeshiftButton"..i]
+        button:SetSize(25, 25)
+        button:ClearAllPoints()
+        
+        local nt = _G["ShapeshiftButton"..i.."NormalTexture"]
+        nt:SetPoint("BOTTOM", 0, -100000000)
+
+        local icon = _G["ShapeshiftButton"..i.."Icon"]
+        icon:SetTexCoord(.07, .93, .07, .93)
+        icon:SetAllPoints(button)
+
+        if i == 1 then
+            button:SetPoint("BOTTOMLEFT", StanceBar)
+        else
+            button:SetPoint("LEFT", _G["ShapeshiftButton"..i-1], "RIGHT")
+        end
+    end
+    StanceBar:SetPoint("BOTTOMLEFT", "AmnUI_"..names[3], 0, 42)
+    StanceBar:SetHeight(25)
+    StanceBar:SetWidth(25*NUM_SHAPESHIFT_SLOTS)
 end
 
 ActionBars.ImAShaman = function()
-	local bar = _G['MultiCastActionBarFrame']
-	if bar then
-		local container = CreateFrame("Frame","AmnUI_TotemBar",UIParent, "SecureHandlerStateTemplate")
-		container:SetWidth(bar:GetWidth())
-		container:SetHeight(bar:GetHeight())
-	  
-	  	bar:SetParent(container)
-		bar:SetAllPoints(container)
-		
-		hooksecurefunc(bar, "SetPoint", function() bar:SetAllPoints(container) end)
-		container:SetPoint("BOTTOMRIGHT", UIParent)
-		
-		container:SetScale(1.2)
+    local bar = _G['MultiCastActionBarFrame']
+    if bar then
+        local container = CreateFrame("Frame","AmnUI_TotemBar",UIParent, "SecureHandlerStateTemplate")
+        container:SetWidth(bar:GetWidth())
+        container:SetHeight(bar:GetHeight())
+      
+        bar:SetParent(container)
+        bar:SetAllPoints(container)
+        
+        hooksecurefunc(bar, "SetPoint", function() bar:SetAllPoints(container) end)
+        container:SetPoint("BOTTOMRIGHT", UIParent)
+        
+        container:SetScale(1.2)
 
-		bar:SetMovable(true)
-		bar:SetUserPlaced(true)
-		bar:EnableMouse(false)
-	end
+        bar:SetMovable(true)
+        bar:SetUserPlaced(true)
+        bar:EnableMouse(false)
+    end
 end
 
 ActionBars.RemoveTextures()
 ActionBars.MoveBars()
 if select(2, UnitClass"player") == "SHAMAN" then
-	ActionBars.ImAShaman()
+    ActionBars.ImAShaman()
 end
 
 ns.ActionBars = ActionBars
