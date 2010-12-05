@@ -5,5 +5,8 @@
 ## Version: 1.0
 ## SavedVariables: AmnUIDB
 core.lua
+uf.lua
+actionbars.lua
+castingbar.lua
 chat.lua
 tooltip.lua
