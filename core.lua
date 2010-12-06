@@ -17,7 +17,7 @@ AmnUI.ADDON_LOADED = function(self, event, addon)
 		if not db then
 			db = {
 				UnitFrames = {	
-					FontSize = AMNUF_DEFAULT_FONT_SIZE,
+					FontSize = 11,
 					Reposition = true,
 					Scale = 1.3,
 				},
