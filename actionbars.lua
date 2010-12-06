@@ -129,7 +129,7 @@ ActionBars.MoveBars = function()
             local oe = button:GetScript"OnEnter"
             local ol = button:GetScript"OnLeave"
             button:SetScript("OnEnter", function(...) hk:MyShow() oe(...) end)
-            button:SetScript("OnLeave", function(...) hk:Hide() oe(...) end)
+            button:SetScript("OnLeave", function(...) hk:Hide() oe(...) GameTooltip:Hide() end)
             
             if i == 1 then
                 button:SetParent(bar)
